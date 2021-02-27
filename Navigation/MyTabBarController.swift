@@ -70,16 +70,25 @@ class MyTabBarController: UIViewController, UITabBarDelegate {
       return formatter
     }()
     
-    func fetch(_ completion: () -> Void) {
-      time = Date()
-      completion()
+    enum FertchError: Error {
+        case empty
+        case invalid
+    }
+    
+    func fetch(_ completion: (Result<Date, FertchError>) -> Void) {
+        time = Date()
+        
+        if let newTime = time {
+            print(newTime.debugDescription)
+            completion(.success(newTime))
+        } else {
+            print("Не смогли получить время в fetch background")
+            completion(.failure(.empty))
+        }
     }
     
     func updateUI() {
-      guard updateLabel != nil  else {
-        return
-      }
-      
+
       if let time = time {
         updateLabel.text = dateFormatter.string(from: time)
       } else {

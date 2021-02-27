@@ -37,9 +37,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let navController = window?.rootViewController as? UINavigationController {
             let viewController = navController.viewControllers[0] as! MyTabBarController
             
-            viewController.fetch {
-                viewController.updateUI()
-                  completionHandler(.newData)
+            viewController.fetch { result in
+                switch result {
+                case .success(_):
+                    viewController.updateUI()
+                    completionHandler(.newData)
+                case .failure(_):
+                    completionHandler(.failed)
+                }
             }
         }
     }
