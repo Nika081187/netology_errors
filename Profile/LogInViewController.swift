@@ -161,7 +161,7 @@ class LogInViewController: UIViewController {
         passwordTextField.toAutoLayout()
         return passwordTextField
     }()
-    
+
     private lazy var logInButton: UIButton = {
         let logInButton = UIButton(type: .system)
         logInButton.setBackgroundImage(#imageLiteral(resourceName: "blue_pixel"), for: .normal)
@@ -177,10 +177,68 @@ class LogInViewController: UIViewController {
         logInButton.toAutoLayout()
         return logInButton
     }()
-    
+
+    enum LoginErrors: Error {
+        case userNotRegistered
+        case passwordIsIncorrect
+        case userIsEmpty
+        case passwordIsEmpty
+    }
+
     @objc func logInButtonPressed() {
-        print("Log in button pressed")
+        print("Нажали кнопку log in")
+        do {
+            try checkCredentials(login: loginTextField.text, password: passwordTextField.text)
+        } catch LoginErrors.passwordIsEmpty {
+            showAlertWith(error: LoginErrors.passwordIsEmpty)
+            return
+        } catch LoginErrors.passwordIsIncorrect {
+            showAlertWith(error: LoginErrors.passwordIsIncorrect)
+            return
+        } catch LoginErrors.userIsEmpty {
+            showAlertWith(error: LoginErrors.userIsEmpty)
+            return
+        } catch LoginErrors.userNotRegistered {
+            showAlertWith(error: LoginErrors.userNotRegistered)
+            return
+        } catch {
+            print("Неизвестная ошибка")
+            return
+        }
         delegate?.onLogInPressed()
+    }
+
+    func showAlertWith(error: LoginErrors) {
+        let message: String
+        switch error {
+        case .passwordIsEmpty:
+            message = "Пароль пуст"
+        case .userNotRegistered:
+            message = "Пользователь не найден"
+        case .passwordIsIncorrect:
+            message = "Пароль не верный"
+        case .userIsEmpty:
+            message = "Пользователь пуст"
+        }
+        print("Ошибка авторизации: \(message)")
+        let alertController = UIAlertController(title: "Ошибка авторизации", message: message, preferredStyle: .alert)
+        let cancelAction = UIAlertAction(title: "OK", style: .default) { _ in }
+        alertController.addAction(cancelAction)
+        self.present(alertController, animated: true, completion: nil)
+    }
+
+    func checkCredentials(login: String?, password: String?) throws {
+        if login == nil || login!.isEmpty {
+            throw LoginErrors.userIsEmpty
+        } else if password == nil || password!.isEmpty {
+            throw LoginErrors.passwordIsEmpty
+        } else if login != "admin" {
+            throw LoginErrors.userNotRegistered
+        } else if login == "admin" && password != "admin" {
+            throw LoginErrors.passwordIsIncorrect
+        } else {
+            print("Ошибок авторизации не выявлено")
+        }
     }
 }
 
