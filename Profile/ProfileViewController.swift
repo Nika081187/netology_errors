@@ -236,6 +236,6 @@ extension ProfileViewController: UITableViewDelegate {
         if section == 1 {
             return photos
         }
-        return nil
+        preconditionFailure("Обнаружена лишняя секция в ProfileViewController")
     }
 }
